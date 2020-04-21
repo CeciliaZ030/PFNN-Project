@@ -7,7 +7,10 @@ from layer import Layer
 class BiasLayer(Layer):
 
     def __init__(self, shape):
+
+    	# share instance of all-zero initialization 
         self.b = theano.shared(name='b', value=np.zeros(shape, dtype=theano.config.floatX), borrow=True)
+        		 # Return a SharedVariable Variable, initialized with a copy or reference of value.
         self.shape = shape
         self.params = [self.b]
     
