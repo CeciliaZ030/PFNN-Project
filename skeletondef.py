@@ -1,3 +1,4 @@
+"""
 ROOT hip
 JOINT abdomen
 	JOINT chest
@@ -42,13 +43,18 @@ JOINT lButtock
 		JOINT lShin
 			JOINT lFoot
 """
+"""
 
 """
-JOINT_NUM = 43
+#JOINT_NUM = 43
+JOINT_NUM = 21
 
-SDR_L, SDR_R, HIP_L, HIP_R = 22, 8, 39, 35
-FOOT_L = [42]
-FOOT_R = [38]
+#SDR_L, SDR_R, HIP_L, HIP_R = 22, 8, 39, 35
+SDR_L, SDR_R, HIP_L, HIP_R = 10, 6, 17, 13
+#FOOT_L = [42]
+FOOT_L = [20, 20]
+#FOOT_R = [38]
+FOOT_R = [16, 16]
 HEAD = 4
 FILTER_OUT = ["leftEye", "rightEye", "rThumb1", "rThumb2", "rIndex1", "rIndex2", "rMid1", "rMid2", "rRing1", "rRing2", "rPinky1", "rPinky2",  "lThumb1", "lThumb2", "lIndex1", "lIndex2", "lMid1", "lMid2", "lRing1", "lRing2", "lPinky1", "lPinky2"]
 JOINT_SCALE = 1
