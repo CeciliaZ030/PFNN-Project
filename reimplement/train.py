@@ -24,7 +24,9 @@ print(X.shape, Y.shape)
 Xmean, Xstd = X.mean(axis=0), X.std(axis=0)
 Ymean, Ystd = Y.mean(axis=0), Y.std(axis=0)
 
-j = 31
+# print(Xstd)
+
+j = 21
 w = ((60*2)//10)
 
 Xstd[w*0:w* 1] = Xstd[w*0:w* 1].mean() # Trajectory Past Positions
@@ -37,9 +39,9 @@ Xstd[w*4:w*10] = Xstd[w*4:w*10].mean() # Trajectory Gait
 
 joint_weights = np.array([
   1, 
-  1, 1, 1, 1, 1e-10, 1e-10,
-  1, 1e-10, 1, 1, 1e-10, 1e-10, 1e-10, 1e-10, 1e-10, 1e-10, 1e-10, 1e-10, 1e-10, 1e-10,
-  1, 1e-10, 1, 1, 1e-10, 1e-10, 1e-10, 1e-10, 1e-10, 1e-10, 1e-10, 1e-10, 1e-10, 1e-10,
+  1, 1, 1, 1, # 1e-10, 1e-10,
+  1, 1e-10, 1, 1, # 1e-10, 1e-10, 1e-10, 1e-10, 1e-10, 1e-10, 1e-10, 1e-10, 1e-10, 1e-10,
+  1, 1e-10, 1, 1, # 1e-10, 1e-10, 1e-10, 1e-10, 1e-10, 1e-10, 1e-10, 1e-10, 1e-10, 1e-10,
   1e-10, 1, 1, 1,
   1e-10, 1, 1, 1 ]).repeat(3)
 
