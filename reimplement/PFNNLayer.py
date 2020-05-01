@@ -1,10 +1,10 @@
 import numpy as np
-import tensorflow as tf 
+import tensorflow as tf
 
 class Layer:
     # phase 是整列input的phase (n)
     def __init__(self, shape, rng, phase, name):
-        
+
         """rng"""
         self.rng = rng
 
@@ -66,8 +66,8 @@ class Layer:
 
 def cubic(y0, y1, y2, y3, mu):
     return (
-        (-0.5*y0+1.5*y1-1.5*y2+0.5*y3)*mu*mu*mu + 
-        (y0-2.5*y1+2.0*y2-0.5*y3)*mu*mu + 
+        (-0.5*y0+1.5*y1-1.5*y2+0.5*y3)*mu*mu*mu +
+        (y0-2.5*y1+2.0*y2-0.5*y3)*mu*mu +
         (-0.5*y0+0.5*y2)*mu +
         (y1))
 
@@ -82,16 +82,16 @@ def save_network(alpha_W, alpha_b, nslices, cache_num, filename):
         mu = pscale % 1
         # index
         pindex_1 = int(pscale) % nslices
-        pindex_0 = (pindex_1-1) % nslices
-        pindex_2 = (pindex_1+1) % nslices
-        pindex_3 = (pindex_1+2) % nslices
+        pindex_0 = (pindex_1 - 1) % nslices
+        pindex_2 = (pindex_1 + 1) % nslices
+        pindex_3 = (pindex_1 + 2) % nslices
 
         # 3 layers of alpha passed in as tuple, len(alpha) = number of layers
         for j in range(len(alpha_W)):
             w = alpha_W[j]
-            b = albha_b[j]
-            W = cubic(a[pindex_0],a[pindex_1],a[pindex_2],a[pindex_3],pamount)
-            B = cubic(b[pindex_0],b[pindex_1],b[pindex_2],b[pindex_3],pamount)
+            b = alpha_b[j]
+            W = cubic(alpha_W[pindex_0],alpha_W[pindex_1],alpha_W[pindex_2],alpha_W[pindex_3],mu)
+            B = cubic(alpha_b[pindex_0],alpha_b[pindex_1],alpha_b[pindex_2],alpha_b[pindex_3],mu)
             print("W B saved")
             W.tofile(filename + './nn/W%0i_%03i.bin' % (j,i))
             B.tofile(filename + './nn/b%0i_%03i.bin' % (j,i))
@@ -101,16 +101,3 @@ def save_network(alpha_W, alpha_b, nslices, cache_num, filename):
         print("control saved")
         alpha_W.tofile(filename + './control/alpha_W%0i.bin' % j)
         alpha_b.tofile(filename + './control/alpha_b%0i.bin' % j)
-
-
-
-
-
-
-
-
-
-
-
-
-

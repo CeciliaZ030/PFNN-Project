@@ -1,5 +1,5 @@
 import numpy as np
-import tensorflow as tf 
+import tensorflow as tf
 import PFNNLayer as PFNN
 from PFNNLayer import Layer
 import os.path
@@ -10,7 +10,7 @@ tf.random.set_seed(23456)  # reproducibility
 
 """ Load Data """
 
-database = np.load('database.npz')
+database = np.load('../database.npz')
 X = database['Xun']
 Y = database['Yun']
 P = database['Pun']
@@ -38,7 +38,7 @@ Xstd[w*4:w*10] = Xstd[w*4:w*10].mean() # Trajectory Gait
 """ Mask Out Unused Joints in Input """
 
 joint_weights = np.array([
-  1, 
+  1,
   1, 1, 1, 1, # 1e-10, 1e-10,
   1, 1e-10, 1, 1, # 1e-10, 1e-10, 1e-10, 1e-10, 1e-10, 1e-10, 1e-10, 1e-10, 1e-10, 1e-10,
   1, 1e-10, 1, 1, # 1e-10, 1e-10, 1e-10, 1e-10, 1e-10, 1e-10, 1e-10, 1e-10, 1e-10, 1e-10,
@@ -114,7 +114,7 @@ Y_nn = tf.compat.v1.placeholder(tf.float32, [None, output_size], name='y-input')
 """parameter"""
 
 rng = np.random.RandomState(23456)
-nslices = 4                             
+nslices = 4
 phase = X_nn[:,-1] # column with phase
 P0 = Layer((nslices, 512, input_size-1), rng, phase, 'wb0')
 P1 = Layer((nslices, 512, 512), rng, phase, 'wb1')
@@ -124,7 +124,7 @@ P2 = Layer((nslices, output_size, 512), rng, phase, 'wb2')
 
 # Input Layer
 H0 = tf.expand_dims(X_nn[:,:-1], -1)# (? * 342 * 1) - built from input shape excluding phase
-H0 = tf.nn.dropout(H0, rate = 0.3) 
+H0 = tf.nn.dropout(H0, rate = 0.3)
 
 b0 = tf.expand_dims(P0.bias, -1) # (? * 512 * 1) which is just P0.bias
 
@@ -160,7 +160,7 @@ loss = cost + regularization_penalty(P0.alpha_W, P1.alpha_W, P1.alpha_W, 0.01)
 
 #optimizer, learning rate 0.0001
 learning_rate = 0.0001
-optimizer = tf.compat.v1.train.AdamOptimizer(learning_rate=learning_rate).minimize(loss) 
+optimizer = tf.compat.v1.train.AdamOptimizer(learning_rate=learning_rate).minimize(loss)
 # the "trainer“ that minimize a loss function
 
 
@@ -177,15 +177,24 @@ saver = tf.compat.v1.train.Saver()
 print('Learning start..')
 batch_size = 32
 training_epochs = 3
-total_batch = int(N / batch_size)
+total_batch = 22906
 print("totoal_batch:", total_batch)
 # use random state to shuffle order or examples
-I = np.arange(N) 
+I = np.arange(N)
 rng.shuffle(I)
 error = np.ones(training_epochs)
 
+# TODO: epoch = training_epochs
 for epoch in range(training_epochs):
     avg_cost = 0
+
+    loss_list = []
+    index_list = []
+
+    import time
+    start_time = time.time()
+
+    # TODO: range(total_batch)
     for i in range(total_batch):
         # take the window of one batch from shuffled example
         index_train = I[i * batch_size : (i + 1) * batch_size]
@@ -197,20 +206,39 @@ for epoch in range(training_epochs):
         feed_dict = {X_nn: batch_xs, Y_nn: batch_ys}
         l, _, = sess.run([cost, optimizer], feed_dict=feed_dict)
         avg_cost += l / total_batch
-        
+
         if i % 10 == 0:
             print(i, "loss:", l)
-    
-    save_path = saver.save(sess, "./model/model.ckpt")
-    PFNN.save_network((sess.run(P0.alpha_W), sess.run(P1.alpha_W), sess.run(P2.alpha_W)), 
-                      (sess.run(P0.alpha_b), sess.run(P1.alpha_b), sess.run(P2.alpha_b)), 
-                      nslices,
-                      50, 
-                      '')
+            loss_list.append(l)
+            index_list.append(i+1)
 
-    print('Epoch:', '%04d' % (epoch + 1), 'loss =', '{:.9f}'.format(avg_cost))
+    # save_path = saver.save(sess, "./model/model.ckpt")
+    # PFNN.save_network((sess.run(P0.alpha_W), sess.run(P1.alpha_W), sess.run(P2.alpha_W)),
+    #                   (sess.run(P0.alpha_b), sess.run(P1.alpha_b), sess.run(P2.alpha_b)),
+    #                   nslices,
+    #                   50,
+    #                   '')
+
+    print('Epoch:', epoch + 1, 'loss =', '{:.9f}'.format(avg_cost))
     error[epoch] = avg_cost
-    error.tofile("./model/error.bin")
-    
-    
+    # error.tofile("./model/error.bin")
+
+    print(f"time spent: {(time.time() - start_time):.2f} ms.")
+
+    with open('loss.txt', 'w') as f:
+        for l in loss_list:
+            f.write('%s\n' % l)
+
+    with open('index.txt', 'w') as f:
+        for l in index_list:
+            f.write('%s\n'%l)
+
+    import matplotlib.pyplot as plt
+    plt.plot(index_list, loss_list)
+    plt.ylabel('loss')
+    plt.xlabel('iterations')
+    plt.title('loss vs. iterations')
+    plt.show()
+
+
 #-----------------------------above is model training----------------------------------
